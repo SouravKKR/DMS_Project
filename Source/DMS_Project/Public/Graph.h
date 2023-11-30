@@ -14,7 +14,7 @@ UCLASS(Blueprintable)
 class DMS_PROJECT_API UGraph : public UObject
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY()
 	TArray<UGraphNode*> Nodes;
 
@@ -30,4 +30,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static UGraph* CreateGraph();
+
+	UFUNCTION(BlueprintPure)
+	static FVector2D GetTextFieldCoord(const FVector2D& PositionOne, const FVector2D& PositionTwo, float Distance);
 };

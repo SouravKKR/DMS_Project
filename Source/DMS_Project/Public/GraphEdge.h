@@ -51,4 +51,5 @@ public:
     UFUNCTION(BlueprintPure, Category = "Graph Edge")
     float GetDistance() const { return FVector2D::Distance(Start->GetCoordinates(), End->GetCoordinates()); }
 	
+   
 };

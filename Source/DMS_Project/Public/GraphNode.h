@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Templates/Tuple.h"
 #include "GraphNode.generated.h"
 
 
@@ -19,8 +20,7 @@ private:
 	UPROPERTY()
 	FVector2D Coordinates;
 
-	UPROPERTY()
-	TArray<UGraphNode*> Neighbours;
+	TArray<TTuple<UGraphNode*,float>> Neighbours;
 
 public:
     // Getter for Name
@@ -39,16 +39,20 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Graph Node")
     void SetCoordinates(const FVector2D& NewCoordinates) { Coordinates = NewCoordinates; }
 
-    // Getter for Neighbours
+    //Getter for Neighbours
     UFUNCTION(BlueprintPure, Category = "Graph Node")
-    const TArray<UGraphNode*>& GetNeighbours() const { return Neighbours; }
+    const TArray<UGraphNode*> GetNeighbours() const;
 
     // Add a neighbour
     UFUNCTION(BlueprintCallable, Category = "Graph Node")
-    void AddNeighbour(UGraphNode* NewNeighbour) { Neighbours.AddUnique(NewNeighbour); }
+    void AddNeighbour(UGraphNode* NewNeighbour);
 
     // Remove a neighbour
     UFUNCTION(BlueprintCallable, Category = "Graph Node")
-    void RemoveNeighbour(UGraphNode* NeighbourToRemove) { Neighbours.Remove(NeighbourToRemove); }
+    void RemoveNeighbour(UGraphNode* NeighbourToRemove);
+
+    UFUNCTION(BlueprintCallable, Category = "Graph Node")
+    static void UpdateNeighbour(UGraphNode* FirstNode, UGraphNode* SecondNode, float NewPathCost);
+
 
 };
