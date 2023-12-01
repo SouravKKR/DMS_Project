@@ -18,6 +18,7 @@ void UGraph::RemoveNode(UGraphNode* NodeToRemove)
 
 UGraph* UGraph::CreateGraph()
 {
+    
 	return NewObject<UGraph>();
 }
 
@@ -41,5 +42,6 @@ FVector2D UGraph::GetTextFieldCoord(const FVector2D& PositionOne, const FVector2
     // Calculate the final result by scaling the unit vector with the constant k
     FVector2D Result = MidPoint + Distance * NormalVector;
 
+    
     return Result;
 }

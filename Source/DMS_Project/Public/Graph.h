@@ -7,9 +7,8 @@
 #include "GraphNode.h"
 #include "Graph.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS(Blueprintable)
 class DMS_PROJECT_API UGraph : public UObject
 {
@@ -33,4 +32,5 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static FVector2D GetTextFieldCoord(const FVector2D& PositionOne, const FVector2D& PositionTwo, float Distance);
+
 };
