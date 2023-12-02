@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "GraphNode.h"
+#include "GraphEdge.h"
 #include "Graph.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNodeCreated, UGraphNode*, NewNode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEdgeCreated, UGraphEdge*, NewEdge);
 
 UCLASS(Blueprintable)
 class DMS_PROJECT_API UGraph : public UObject
@@ -15,7 +17,10 @@ class DMS_PROJECT_API UGraph : public UObject
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TArray<UGraphNode*> Nodes;
+	TSet<UGraphNode*> Nodes;
+
+	UPROPERTY()
+	TSet<UGraphEdge*> Edges;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -23,6 +28,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveNode(UGraphNode* NodeToRemove);
+
+	UFUNCTION(BlueprintCallable)
+	UGraphEdge* CreateNewEdge(UGraphNode* Start, UGraphNode* End);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveEdge(UGraphEdge* NodeToRemove);
+
+	UFUNCTION(BlueprintCallable)
+	TSet<UGraphNode*> GetVertexSet();
+
+	UFUNCTION(BlueprintCallable)
+	TSet<UGraphEdge*> GetEdgeSet();
 
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE int GetNumberOfNodes() const { return Nodes.Num(); }
@@ -33,4 +50,12 @@ public:
 	UFUNCTION(BlueprintPure)
 	static FVector2D GetTextFieldCoord(const FVector2D& PositionOne, const FVector2D& PositionTwo, float Distance);
 
+
+	//Delegates
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNodeCreated OnNodeCreated;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEdgeCreated OnEdgeCreated;
 };

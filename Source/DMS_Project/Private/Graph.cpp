@@ -5,10 +5,12 @@
 
 UGraphNode* UGraph::CreateNewNode(const FString& Name, const FVector2D& Coordinates)
 {
-	Nodes.Add(NewObject<UGraphNode>());
-	Nodes.Last()->SetName(Name);
-	Nodes.Last()->SetCoordinates(Coordinates);
-	return Nodes.Last();
+    auto NewNode = NewObject<UGraphNode>();
+    NewNode->SetName(Name);;
+    NewNode->SetCoordinates(Coordinates);
+    Nodes.Add(NewNode);
+    OnNodeCreated.Broadcast(NewNode);
+	return NewNode;
 }
 
 void UGraph::RemoveNode(UGraphNode* NodeToRemove)
@@ -16,9 +18,33 @@ void UGraph::RemoveNode(UGraphNode* NodeToRemove)
 	Nodes.Remove(NodeToRemove);
 }
 
+UGraphEdge* UGraph::CreateNewEdge(UGraphNode* Start, UGraphNode* End)
+{
+    auto NewEdge = NewObject<UGraphEdge>();
+    NewEdge->SetStart(Start);
+    NewEdge->SetEnd(End);
+    Edges.Add(NewEdge);
+    OnEdgeCreated.Broadcast(NewEdge);
+    return NewEdge;
+}
+
+void UGraph::RemoveEdge(UGraphEdge* EdgeToRemove)
+{
+    Edges.Remove(EdgeToRemove);
+}
+
+TSet<UGraphNode*> UGraph::GetVertexSet()
+{
+    return Nodes;
+}
+
+TSet<UGraphEdge*> UGraph::GetEdgeSet()
+{
+    return Edges;
+}
+
 UGraph* UGraph::CreateGraph()
 {
-    
 	return NewObject<UGraph>();
 }
 
