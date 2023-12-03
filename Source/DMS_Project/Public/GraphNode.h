@@ -44,7 +44,8 @@ public:
     const TArray<UGraphNode*> GetNeighbours() const;
 
     //Getter for neighbours
-    TArray<TTuple<UGraphNode*, float >> Get() const
+    TArray<TTuple<UGraphNode*, float >> GetNeighboursAsTuple() const;
+
     // Add a neighbour
     UFUNCTION(BlueprintCallable, Category = "Graph Node")
     void AddNeighbour(UGraphNode* NewNeighbour);
