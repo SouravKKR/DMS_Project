@@ -16,6 +16,11 @@ const TArray<UGraphNode*> UGraphNode::GetNeighbours() const
 	return NeighbourNodes;
 }
 
+TArray<TTuple<UGraphNode*, float>> UGraphNode::GetNeighboursAsTuple() const
+{
+	return Neighbours;
+}
+
 void UGraphNode::AddNeighbour(UGraphNode* NewNeighbour)
 {
 	Neighbours.AddUnique(TTuple<UGraphNode*, float>(NewNeighbour, 0.0f));

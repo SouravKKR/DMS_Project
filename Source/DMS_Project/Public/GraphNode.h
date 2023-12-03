@@ -43,6 +43,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "Graph Node")
     const TArray<UGraphNode*> GetNeighbours() const;
 
+    //Getter for neighbours
+    TArray<TTuple<UGraphNode*, float >> Get() const
     // Add a neighbour
     UFUNCTION(BlueprintCallable, Category = "Graph Node")
     void AddNeighbour(UGraphNode* NewNeighbour);
