@@ -8,6 +8,27 @@
 #include "GraphEdge.h"
 #include "Graph.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPathInfo
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<UGraphNode*> Path;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Cost;
+
+	FPathInfo(TArray<UGraphNode*> InPath, float InCost) :
+		Path(InPath),
+		Cost(InCost)
+	{
+
+	}
+
+	FPathInfo(){}
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNodeCreated, UGraphNode*, NewNode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEdgeCreated, UGraphEdge*, NewEdge);
 
@@ -50,6 +71,11 @@ public:
 	UFUNCTION(BlueprintPure)
 	static FVector2D GetTextFieldCoord(const FVector2D& PositionOne, const FVector2D& PositionTwo, float Distance);
 
+	//Logic for traversing and finding shortest path
+	void Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& Result, float& ShortestDistance);
+
+	UFUNCTION(BlueprintCallable)
+	FPathInfo FindShortestPath(UGraphNode* StartingNode, UGraphNode* DestinationNode);
 
 	//Delegates
 

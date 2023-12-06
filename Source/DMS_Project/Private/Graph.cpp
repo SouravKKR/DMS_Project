@@ -2,6 +2,8 @@
 
 
 #include "Graph.h"
+#include <map>
+#include <set>
 
 UGraphNode* UGraph::CreateNewNode(const FString& Name, const FVector2D& Coordinates)
 {
@@ -70,4 +72,67 @@ FVector2D UGraph::GetTextFieldCoord(const FVector2D& PositionOne, const FVector2
 
     
     return Result;
+}
+
+void UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& ShortestPath, float& ShortestDistance)
+{
+    std::map<UGraphNode*, float> Distance;
+    std::map<UGraphNode*, UGraphNode*> Previous;
+    // try to use TTuple instead of TPair
+    std::set<std::pair<float, UGraphNode*>> PriorityQueue;
+
+    // Initialization
+    TSet<UGraphNode*> AllNodes = GetVertexSet();
+    for (const auto Node : AllNodes)
+    {
+        Distance[Node] = FLT_MAX;
+        Previous[Node] = nullptr;
+        PriorityQueue.insert({ FLT_MAX, Node });
+    }
+
+    Distance[StartNode] = 0.0f;
+    PriorityQueue.erase({ FLT_MAX, StartNode });
+    PriorityQueue.insert({ 0.0f, StartNode });
+
+    // Dijkstra's algorithm
+    while (!PriorityQueue.empty())
+    {
+        UGraphNode* CurrNode = PriorityQueue.begin()->second;
+        PriorityQueue.erase(PriorityQueue.begin());
+        const TArray<TTuple<UGraphNode*, float>> Neighbors = CurrNode->GetNeighboursAsTuple();
+
+        for (const TTuple<UGraphNode*, float> Neighbor : Neighbors)
+        {
+            UGraphNode* NextNode = Neighbor.Get<0>();
+            float EdgeWeight = Neighbor.Get<1>();
+            float NewDistance = Distance[CurrNode] + EdgeWeight;
+
+            if (NewDistance < Distance[NextNode])
+            {
+                PriorityQueue.erase({ Distance[NextNode], NextNode });
+                PriorityQueue.insert({ NewDistance, NextNode });
+                Distance[NextNode] = NewDistance;
+                Previous[NextNode] = CurrNode;
+            }
+        }
+    }
+
+    // Reconstruct the shortest path
+    ShortestDistance = Distance[DestinationNode];
+    UGraphNode* CurrentNode = DestinationNode;
+    while (CurrentNode != nullptr)
+    {
+        ShortestPath.Get<0>().Insert(CurrentNode, 0);
+        CurrentNode = Previous[CurrentNode];
+    }
+
+}
+
+FPathInfo UGraph::FindShortestPath(UGraphNode* StartingNode, UGraphNode* DestinationNode)
+{
+    TTuple<TArray<UGraphNode*>, float> Result;
+    float ShortestDistance;
+    Dijkstra(StartingNode, DestinationNode, Result, ShortestDistance);
+
+    return FPathInfo(Result.Get<0>(), Result.Get<1>());
 }
