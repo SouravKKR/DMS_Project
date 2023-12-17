@@ -58,7 +58,7 @@ FVector2D UGraph::GetTextFieldCoord(const FVector2D& PositionOne, const FVector2
     // Find the direction vector of the line
     FVector2D LineDirection = (PositionTwo - PositionOne).GetSafeNormal();
 
-    // Calculate the unit normal vector perpendicular to the line
+    // Calculate the unit normal vector perpendicular to line
     FVector2D NormalVector = FVector2D(-LineDirection.Y, LineDirection.X);
 
     // Ensure the normal vector always faces in a consistent direction (up or down)
