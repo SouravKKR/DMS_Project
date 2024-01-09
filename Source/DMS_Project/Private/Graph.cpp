@@ -4,6 +4,9 @@
 #include "Graph.h"
 #include <map>
 #include <set>
+#include "Kismet/KismetSystemLibrary.h"
+
+#define PRINT(x) UKismetSystemLibrary::PrintString(this, x);
 
 UGraphNode* UGraph::CreateNewNode(const FString& Name, const FVector2D& Coordinates)
 {
@@ -74,8 +77,22 @@ FVector2D UGraph::GetTextFieldCoord(const FVector2D& PositionOne, const FVector2
     return Result;
 }
 
-void UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& ShortestPath, float& ShortestDistance)
+UGraphNode* UGraph::GetNodeByName(const FString& Name)
 {
+	for (auto& Node : Nodes)
+	{
+		if (Node->GetName() == Name)
+		{
+			return Node;
+		}   
+	}
+    return nullptr;
+}
+
+FPathCollection UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& ShortestPath, float& ShortestDistance)
+{
+    FPathCollection PathCollection;
+
     std::map<UGraphNode*, float> Distance;
     std::map<UGraphNode*, UGraphNode*> Previous;
     // try to use TTuple instead of TPair
@@ -98,6 +115,7 @@ void UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple
     while (!PriorityQueue.empty())
     {
         UGraphNode* CurrNode = PriorityQueue.begin()->second;
+		PathCollection.PathTraced.Add(CurrNode);
         PriorityQueue.erase(PriorityQueue.begin());
         const TArray<TTuple<UGraphNode*, float>> Neighbors = CurrNode->GetNeighboursAsTuple();
 
@@ -126,13 +144,29 @@ void UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple
         CurrentNode = Previous[CurrentNode];
     }
 
+    PathCollection.ShortestPath = FPathInfo(ShortestPath.Get<0>(), ShortestPath.Get<1>());
+    
+    PRINT("Shortest Path(inside): " + FString::FromInt(PathCollection.ShortestPath.Path.Num()));
+	PRINT("Path Traced(inside): " + FString::FromInt(PathCollection.PathTraced.Num()));
+
+    return PathCollection;
 }
 
-FPathInfo UGraph::FindShortestPath(UGraphNode* StartingNode, UGraphNode* DestinationNode)
+FPathCollection UGraph::RunAlgorithm(UGraphNode* StartingNode, UGraphNode* DestinationNode, const FString& AlgorithmName)
 {
-    TTuple<TArray<UGraphNode*>, float> Result;
-    float ShortestDistance;
-    Dijkstra(StartingNode, DestinationNode, Result, ShortestDistance);
-
-    return FPathInfo(Result.Get<0>(), Result.Get<1>());
+	if (AlgorithmName == "Dijkstras")
+	{
+		TTuple<TArray<UGraphNode*>, float> ShortestPath;
+		float ShortestDistance;
+        FPathCollection P = Dijkstra(StartingNode, DestinationNode, ShortestPath, ShortestDistance);
+		PRINT("Shortest Path(outside): " + FString::FromInt(P.ShortestPath.Path.Num()));
+        PRINT("Path Traced(outside): " + FString::FromInt(P.PathTraced.Num()));
+        return P;
+	}
+	else
+	{
+		return FPathCollection();
+	}
 }
+
+

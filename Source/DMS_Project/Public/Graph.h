@@ -29,6 +29,27 @@ struct FPathInfo
 	FPathInfo(){}
 };
 
+USTRUCT(BlueprintType)
+struct FPathCollection
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FPathInfo ShortestPath;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<UGraphNode*> PathTraced;
+
+	FPathCollection() {}
+
+	FPathCollection(FPathInfo InShortestPath, TArray<UGraphNode*> InPathTraced) :
+		ShortestPath(InShortestPath),
+		PathTraced(InPathTraced)
+	{
+	}
+};
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNodeCreated, UGraphNode*, NewNode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEdgeCreated, UGraphEdge*, NewEdge);
 
@@ -42,6 +63,10 @@ class DMS_PROJECT_API UGraph : public UObject
 
 	UPROPERTY()
 	TSet<UGraphEdge*> Edges;
+
+public:
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//TArray<UGraphNode*> AllPaths;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -71,14 +96,16 @@ public:
 	UFUNCTION(BlueprintPure)
 	static FVector2D GetTextFieldCoord(const FVector2D& PositionOne, const FVector2D& PositionTwo, float Distance);
 
+	UFUNCTION(BlueprintPure)
+	UGraphNode* GetNodeByName(const FString& Name);
+
 	//Logic for traversing and finding shortest path
-	void Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& Result, float& ShortestDistance);
+	FPathCollection Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& Result, float& ShortestDistance);
 
 	UFUNCTION(BlueprintCallable)
-	FPathInfo FindShortestPath(UGraphNode* StartingNode, UGraphNode* DestinationNode);
+	FPathCollection RunAlgorithm(UGraphNode* StartingNode, UGraphNode* DestinationNode, const FString& AlgorithmName);
 
 	//Delegates
-
 	UPROPERTY(BlueprintAssignable)
 	FOnNodeCreated OnNodeCreated;
 
