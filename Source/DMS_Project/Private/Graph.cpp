@@ -163,10 +163,86 @@ FPathCollection UGraph::RunAlgorithm(UGraphNode* StartingNode, UGraphNode* Desti
         PRINT("Path Traced(outside): " + FString::FromInt(P.PathTraced.Num()));
         return P;
 	}
+    if (AlgorithmName.ToLower() == "dfs")
+    {
+		auto AdjacencyList = GetAdjacencyList();
+        return DfsBestPath(StartingNode, DestinationNode, AdjacencyList);
+    }
 	else
 	{
 		return FPathCollection();
 	}
 }
+
+void UGraph::Dfs(UGraphNode* CurrentNode, UGraphNode* DestinationNode, TMap<UGraphNode*, bool>& visited,
+    TArray<UGraphNode* >& path, float& pathWeight,
+    const TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& adjacencyList,
+    TArray<UGraphNode* >& bestPath, float& bestPathWeight,
+    FPathCollection& PathCollection) {
+
+    PathCollection.PathTraced.Emplace(CurrentNode);
+    visited[CurrentNode] = true;
+    path.Emplace(CurrentNode);
+
+    if (CurrentNode == DestinationNode) {
+        // If the current path is better (less cost) than the current best path, update the best path
+        if (pathWeight < bestPathWeight) {
+            bestPath = path;
+            bestPathWeight = pathWeight;
+        }
+    }
+    else {
+        for (const auto& neighbor : adjacencyList[CurrentNode]) 
+        {
+            UGraphNode* nextVertex = neighbor.Get<0>();
+            float edgeWeight = neighbor.Get<1>();
+
+            if (!visited[nextVertex]) {
+                pathWeight += edgeWeight;
+                Dfs(nextVertex, DestinationNode, visited, path, pathWeight, adjacencyList, bestPath, bestPathWeight, PathCollection);
+                pathWeight -= edgeWeight;
+            }
+        }
+    }
+
+    // Backtrack
+    visited[CurrentNode] = false;
+	path.RemoveAt(path.Num() - 1);
+}
+
+// Function to find and print the best (least cost) path from the start to destination node
+FPathCollection UGraph::DfsBestPath(UGraphNode* StartNode, UGraphNode* DestinationNode,
+    const TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& adjacencyList) 
+{
+
+    TMap<UGraphNode*, bool> visited;
+
+    for (const auto& vertex : adjacencyList) 
+    {
+        visited[vertex.Get<0>()] = false;
+    }
+    FPathCollection  PathCollection;
+    FPathInfo PathInfo;
+    TArray<UGraphNode*> path;
+    float pathWeight = 0;
+    TArray<UGraphNode*> bestPath; // This holds the best path 
+    float bestPathWeight = FLT_MAX; // Initialize to a large value
+
+    // Find the best path
+    Dfs(StartNode, DestinationNode, visited, path, pathWeight, adjacencyList, bestPath, bestPathWeight, PathCollection);
+
+    PathInfo.Path = bestPath;
+    PathInfo.Cost = pathWeight;
+    PathCollection.ShortestPath = PathInfo;
+
+    return PathCollection;
+}
+
+TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>> UGraph::GetAdjacencyList()
+{
+    return TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>();
+}
+
+
 
 

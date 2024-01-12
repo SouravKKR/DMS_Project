@@ -64,9 +64,6 @@ class DMS_PROJECT_API UGraph : public UObject
 	UPROPERTY()
 	TSet<UGraphEdge*> Edges;
 
-public:
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	//TArray<UGraphNode*> AllPaths;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -104,6 +101,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FPathCollection RunAlgorithm(UGraphNode* StartingNode, UGraphNode* DestinationNode, const FString& AlgorithmName);
+
+	void Dfs(UGraphNode* CurrentNode, UGraphNode* DestinationNode, TMap<UGraphNode*, bool>& visited,
+		TArray<UGraphNode* >& path, float& pathWeight,
+		const TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& adjacencyList,
+		TArray<UGraphNode* >& bestPath, float& bestPathWeight,
+		FPathCollection& PathCollection);
+
+	FPathCollection DfsBestPath(UGraphNode* StartNode, UGraphNode* DestinationNode,
+		const TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& adjacencyList);
+
+	TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>> GetAdjacencyList();
 
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
