@@ -184,9 +184,11 @@ void UGraph::Dfs(UGraphNode* CurrentNode, UGraphNode* DestinationNode, TMap<UGra
     visited[CurrentNode] = true;
     path.Emplace(CurrentNode);
 
-    if (CurrentNode == DestinationNode) {
+    if (CurrentNode == DestinationNode) 
+    {
         // If the current path is better (less cost) than the current best path, update the best path
-        if (pathWeight < bestPathWeight) {
+        if (pathWeight < bestPathWeight) 
+        {
             bestPath = path;
             bestPathWeight = pathWeight;
         }
@@ -197,9 +199,11 @@ void UGraph::Dfs(UGraphNode* CurrentNode, UGraphNode* DestinationNode, TMap<UGra
             UGraphNode* nextVertex = neighbor.Get<0>();
             float edgeWeight = neighbor.Get<1>();
 
-            if (!visited[nextVertex]) {
+            if (!visited[nextVertex]) 
+            {
                 pathWeight += edgeWeight;
                 Dfs(nextVertex, DestinationNode, visited, path, pathWeight, adjacencyList, bestPath, bestPathWeight, PathCollection);
+                PathCollection.PathTraced.Emplace(CurrentNode);
                 pathWeight -= edgeWeight;
             }
         }
@@ -217,9 +221,9 @@ FPathCollection UGraph::DfsBestPath(UGraphNode* StartNode, UGraphNode* Destinati
 
     TMap<UGraphNode*, bool> visited;
 
-    for (const auto& vertex : adjacencyList) 
+    for (const auto& vertex : Nodes) 
     {
-        visited[vertex.Get<0>()] = false;
+        visited.Emplace(vertex, false);
     }
     FPathCollection  PathCollection;
     FPathInfo PathInfo;
@@ -240,7 +244,30 @@ FPathCollection UGraph::DfsBestPath(UGraphNode* StartNode, UGraphNode* Destinati
 
 TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>> UGraph::GetAdjacencyList()
 {
-    return TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>();
+    // Assuming you have a member variable containing the edges
+
+    // Create and populate the adjacency list
+    TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>> adjacencyList;
+
+    for (UGraphEdge* Edge : Edges)
+    {
+        UGraphNode* StartNode = Edge->GetStart();
+        UGraphNode* EndNode = Edge->GetEnd();
+        float EdgeWeight = Edge->GetCost();
+
+		if (!adjacencyList.Contains(StartNode))
+		{
+			adjacencyList.Emplace(StartNode, TArray<TTuple<UGraphNode*, float>>());
+		}
+        adjacencyList[StartNode].Emplace(TTuple<UGraphNode*, float>(EndNode, EdgeWeight));
+        if (!adjacencyList.Contains(EndNode))
+        {
+            adjacencyList.Emplace(EndNode, TArray<TTuple<UGraphNode*, float>>());
+        }
+        adjacencyList[EndNode].Emplace(TTuple<UGraphNode*, float>(StartNode, EdgeWeight));
+    }
+
+    return adjacencyList;
 }
 
 

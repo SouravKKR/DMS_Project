@@ -21,7 +21,7 @@ protected:
     UGraphNode* End;
 	
 	UPROPERTY()
-	float AverageSpeed;
+	float Cost;
 
 public:
     UFUNCTION(BlueprintPure, Category = "Graph Edge")
@@ -41,11 +41,11 @@ public:
 
     // Getter for AverageSpeed
     UFUNCTION(BlueprintPure, Category = "Graph Edge")
-    float GetAverageSpeed() const { return AverageSpeed; }
+    float GetCost() const { return Cost * GetDistance(); }
 
     // Setter for AverageSpeed
     UFUNCTION(BlueprintCallable, Category = "Graph Edge")
-    void SetAverageSpeed(float NewAverageSpeed) { AverageSpeed = NewAverageSpeed; }
+    void SetCostPerUnitDistance(float NewCost) { Cost = NewCost; }
 
     // Getter for Distance
     UFUNCTION(BlueprintPure, Category = "Graph Edge")
