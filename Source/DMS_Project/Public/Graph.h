@@ -97,7 +97,10 @@ public:
 	UGraphNode* GetNodeByName(const FString& Name);
 
 	//Logic for traversing and finding shortest path
-	FPathCollection Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& Result, float& ShortestDistance);
+	//FPathCollection Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& Result, float& ShortestDistance);
+	void Dijkstra(TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& graph, UGraphNode* start, UGraphNode* destination, FPathCollection& PathCollection);
+
+	FPathCollection DijkstraBestPath(UGraphNode* StartNode, UGraphNode* DestinationNode, TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& AdjacencyList);
 
 	UFUNCTION(BlueprintCallable)
 	FPathCollection RunAlgorithm(UGraphNode* StartingNode, UGraphNode* DestinationNode, const FString& AlgorithmName);
@@ -113,6 +116,7 @@ public:
 
 	TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>> GetAdjacencyList();
 
+	
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FOnNodeCreated OnNodeCreated;

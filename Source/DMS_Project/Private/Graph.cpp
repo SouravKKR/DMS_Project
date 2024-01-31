@@ -4,6 +4,9 @@
 #include "Graph.h"
 #include <map>
 #include <set>
+#include <queue>
+#include <vector>
+#include <functional> 
 #include "Kismet/KismetSystemLibrary.h"
 
 #define PRINT(x) UKismetSystemLibrary::PrintString(this, x);
@@ -89,7 +92,7 @@ UGraphNode* UGraph::GetNodeByName(const FString& Name)
     return nullptr;
 }
 
-FPathCollection UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& ShortestPath, float& ShortestDistance)
+/*FPathCollection UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationNode, TTuple<TArray<UGraphNode*>, float>& ShortestPath, float& ShortestDistance)
 {
     FPathCollection PathCollection;
 
@@ -151,21 +154,99 @@ FPathCollection UGraph::Dijkstra(UGraphNode* StartNode, UGraphNode* DestinationN
 
     return PathCollection;
 }
+*/
+FPathCollection UGraph::DijkstraBestPath(UGraphNode* StartNode, UGraphNode* DestinationNode, TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& adjacencyList)
+{
+    FPathCollection  PathCollection;
+    Dijkstra(adjacencyList, StartNode, DestinationNode, PathCollection);
+    return PathCollection;
+}
+
+void UGraph::Dijkstra(TMap<UGraphNode*, TArray<TTuple<UGraphNode*, float>>>& graph, UGraphNode* start, UGraphNode* destination, FPathCollection& PathCollection)
+{
+    TMap<UGraphNode*, float> distance;
+    TMap<UGraphNode*, UGraphNode*> parent;
+    std::set<UGraphNode*> visited;
+
+    TArray<UGraphNode*> pathTrace;
+    FPathInfo PathInfo;
+    std::set<TTuple<float, UGraphNode*>> pq;
+    
+    for (auto node : graph) 
+    {
+        distance.Add(node.Get<0>(), FLT_MAX);
+        parent.Add(node.Get<0>(), nullptr) ;
+        pq.insert(TTuple<float, UGraphNode*>(node.Get<0>() == start ? 0 : FLT_MAX, node.Get<0>()));
+    }
+    
+    TSet<UGraphNode*> AllNodes = GetVertexSet();
+    for (const auto Node : AllNodes)
+    {
+        distance.Add(Node, FLT_MAX);
+        parent.Add( Node, nullptr);
+    }
+    distance[start] = 0;
+
+
+    while (!pq.empty()) 
+    {
+        UGraphNode* current = pq.begin()->Get<1>();
+        pq.erase(pq.begin());
+        
+        if (current == start)
+        {
+            UKismetSystemLibrary::PrintString(this, "CURRENT = START");
+        }
+		UKismetSystemLibrary::PrintString(this, "CURRENT: " + current->GetName());
+		UKismetSystemLibrary::PrintString(this, "START" + start->GetName());
+
+        if (visited.count(current)) continue;
+
+        visited.insert(current);
+        pathTrace.Emplace(current);  // Store the node in the trace vector
+
+        
+        for (auto neighbor : graph[current]) 
+        {
+            UGraphNode* nextNode = neighbor.Get<0>();
+            float edgeWeight = neighbor.Get<1>();
+
+            if (distance[current] + edgeWeight < distance[nextNode]) 
+            {
+                distance[nextNode] = distance[current] + edgeWeight;
+                parent[nextNode] = current;
+                pq.insert(TTuple<float, UGraphNode*>(distance[nextNode], nextNode ));
+            }
+        }
+    }
+
+    // Trace the best path
+    UGraphNode* current = destination;
+    while (current != nullptr) {
+        PathInfo.Path.Emplace(current);
+        current = parent[current];
+    }
+    PathInfo.Cost = distance[destination];
+    PathCollection.ShortestPath = PathInfo;
+    PathCollection.PathTraced = pathTrace;
+
+}
 
 FPathCollection UGraph::RunAlgorithm(UGraphNode* StartingNode, UGraphNode* DestinationNode, const FString& AlgorithmName)
 {
+    auto AdjacencyList = GetAdjacencyList();
+
 	if (AlgorithmName == "Dijkstras")
 	{
 		TTuple<TArray<UGraphNode*>, float> ShortestPath;
-		float ShortestDistance;
-        FPathCollection P = Dijkstra(StartingNode, DestinationNode, ShortestPath, ShortestDistance);
+		//float ShortestDistance;
+        FPathCollection P = DijkstraBestPath(StartingNode, DestinationNode, AdjacencyList);
 		PRINT("Shortest Path(outside): " + FString::FromInt(P.ShortestPath.Path.Num()));
         PRINT("Path Traced(outside): " + FString::FromInt(P.PathTraced.Num()));
         return P;
 	}
     if (AlgorithmName.ToLower() == "dfs")
     {
-		auto AdjacencyList = GetAdjacencyList();
         return DfsBestPath(StartingNode, DestinationNode, AdjacencyList);
     }
 	else
